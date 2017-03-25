@@ -116,14 +116,54 @@ module Blocktrail
       get("/webhook/#{identifier}/events", {}, params: { page: page, limit: limit })
     end
 
+    def setup_webhook(url, identifier = nil)
+      post("/webhook", { url: url, identifier: identifier })
+    end
+
+    def update_webhook(identifier, new_url = nil, new_identifier = nil)
+      put("/webhook/#{identifier}", { url: new_url, identifier: new_identifier })
+    end
+
+    def delete_webhook(identifier)
+      delete("/webhook/#{identifier}")
+    end
+
+    def subscribe_address_transactions(identifier, address, confirmations = 6)
+      post("/webhook/#{identifier}/events", { event_type: 'address-transactions', address: address, confirmations: confirmations })
+    end
+
+    def subscribe_new_blocks(identifier)
+      post("/webhook/#{identifier}/events", { event_type: 'block' })
+    end
+
+    def subscribe_transaction(identifier, transaction, confirmations = 6)
+      post("/webhook/#{identifier}/events", { event_type: 'transaction', transaction: transaction, confirmations: confirmations })
+    end
+
+    def unsubscribe_address_transactions(identifier, address)
+      delete("/webhook/#{identifier}/address-transactions/#{address}")
+    end
+
+    def unsubscribe_new_blocks(identifier)
+      delete("/webhook/#{identifier}/block")
+    end
+
+    def unsubscribe_transaction(identifier, transaction)
+      delete("/webhook/#{identifier}/transaction/#{transaction}")
+    end
+
     def price
       get("/price")
+    end
+
+    def verify_message(message, address, signature)
+      post("/verify_message", { message: message, address: address, signature: signature })
     end
 
     # Payments API
 
     def all_wallets(page = 1, limit = 20)
-      get("/wallets", nil, {}, params: { page: page, limit: limit })
+      get("/wallets", {}, params: { page: page, limit: limit })
     end
 
     def get_wallet(identifier)
@@ -140,6 +180,10 @@ module Blocktrail
 
     def get_new_derivation(identifier, path)
       post("/wallet/#{identifier}/path", { path: path })
+    end
+
+    def send_transaction(identifier, raw_tx, paths, check_fee = false)
+      post("/wallet/#{identifier}/send", { raw_transaction: raw_tx, paths: paths }, params: { check_fee: check_fee })
     end
 
     private
@@ -172,7 +216,7 @@ module Blocktrail
         puts 'Headers: ' + response.headers.inspect
         puts 'Content: ' + response.body.inspect
       end
-      response.empty? ? nil : JSON.parse(response)
+      response.empty? ? nil : JSON.parse(response, quirks_mode: true)
     rescue RestClient::ExceptionWithResponse => error
       raise Blocktrail::Exceptions.build_exception(error)
     end
