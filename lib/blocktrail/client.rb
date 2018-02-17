@@ -8,34 +8,28 @@ module Blocktrail
   class Client
     attr_accessor :api_key, :api_secret, :api_version, :testnet, :debug, :bitcoin_cash
 
-    def initialize(api_key, api_secret, api_version = 'v1', testnet = false, debug = false, bitcoin_cash = true)
-      @api_key = api_key
-      @api_secret = api_secret
-      @api_version = api_version
-      @testnet = testnet
-      @debug = debug
-      @bitcoin_cash = bitcoin_cash
-    end
+    def initialize(options = {})
+      @api_key = options[:api_key];                         @api_key ||= ENV['BLOCKTRAIL_API_KEY'];
+      @api_secret = options[:api_secret];                   @api_secret ||= ENV['BLOCKTRAIL_API_SECRET'];
+      raise RuntimeError, "No API Keys defined" if @api_key.nil? || @api_secret.nil?
 
-    def api_key
-      @api_key || ENV['API_KEY']
-    end
-
-    def api_secret
-      @api_secret ||= ENV['API_SECRET']
+      @api_version ||= options[:api_version];     @api_version ||= 'v1';
+      @testnet = options[:testnet];               @testnet ||= false;
+      @debug ||= options[:debug];                 @debug ||= false;
+      @bitcoin_cash ||= options[:bitcoin_cash];   @bitcoin_cash ||= true;
     end
 
     def default_headers
       {
-        'Content-Type': 'application/json',
-        'User-Agent': "#{Blocktrail::SDK_USER_AGENT}/#{Blocktrail::VERSION}",
-        'Date': Time.now.utc.iso8601
+        'Content-Type' => 'application/json',
+        'User-Agent'=> "#{Blocktrail::SDK_USER_AGENT}/#{Blocktrail::VERSION}",
+        'Date' => Time.now.utc.iso8601
       }
     end
 
     def default_params
       {
-        'api_key': api_key
+        'api_key'=> api_key
       }
     end
 
