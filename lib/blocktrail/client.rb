@@ -27,7 +27,7 @@ module Blocktrail
 
     def default_headers
       {
-        'Content-Type' => 'application/json',
+        'Content-Type': 'application/json',
         'User-Agent': "#{Blocktrail::SDK_USER_AGENT}/#{Blocktrail::VERSION}",
         'Date': Time.now.utc.iso8601
       }
@@ -190,7 +190,7 @@ module Blocktrail
     private
 
     def request(method, url, payload = {}, headers = {})
-      url = "https://api.blocktrail.com/#{api_version}/#{testnet ? 't' : ''}#{bitcoin_cas ? bcc : btc}#{url}"
+      url = "https://api.blocktrail.com/#{api_version}/#{testnet ? 't' : ''}#{bitcoin_cash ? 'bcc' : 'btc'}#{url}"
 
       headers['Content-MD5'] = if payload.empty?
         Digest::MD5.hexdigest('') # needs url here
