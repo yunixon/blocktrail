@@ -6,14 +6,15 @@ require 'api-auth'
 
 module Blocktrail
   class Client
-    attr_accessor :api_key, :api_secret, :api_version, :testnet, :debug
+    attr_accessor :api_key, :api_secret, :api_version, :testnet, :debug, :bitcoin_cash
 
-    def initialize(api_key, api_secret, api_version = 'v1', testnet = false, debug = false)
+    def initialize(api_key, api_secret, api_version = 'v1', testnet = false, debug = false, bitcoin_cash = true)
       @api_key = api_key
       @api_secret = api_secret
       @api_version = api_version
       @testnet = testnet
       @debug = debug
+      @bitcoin_cash = bitcoin_cash
     end
 
     def api_key
@@ -189,7 +190,7 @@ module Blocktrail
     private
 
     def request(method, url, payload = {}, headers = {})
-      url = "https://api.blocktrail.com/#{api_version}/#{testnet ? 't' : ''}btc#{url}"
+      url = "https://api.blocktrail.com/#{api_version}/#{testnet ? 't' : ''}#{bitcoin_cas ? bcc : btc}#{url}"
 
       headers['Content-MD5'] = if payload.empty?
         Digest::MD5.hexdigest('') # needs url here
