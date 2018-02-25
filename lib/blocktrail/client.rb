@@ -6,30 +6,30 @@ require 'api-auth'
 
 module Blocktrail
   class Client
-    attr_accessor :api_key, :api_secret, :api_version, :testnet, :debug, :bitcoin_cash
+    attr_accessor :api_key, :api_secret, :api_version, :coin, :testnet, :debug
 
     def initialize(options = {})
-      @api_key = options[:api_key];                         @api_key ||= ENV['BLOCKTRAIL_API_KEY'];
-      @api_secret = options[:api_secret];                   @api_secret ||= ENV['BLOCKTRAIL_API_SECRET'];
-      raise RuntimeError, "No API Keys defined" if @api_key.nil? || @api_secret.nil?
+      @api_key = options[:api_key].presence || ENV['BLOCKTRAIL_API_KEY']
+      @api_secret = options[:api_secret].presence || ENV['BLOCKTRAIL_API_SECRET']
+      raise 'No API Keys defined' if @api_key.blank? || @api_secret.blank?
 
-      @api_version ||= options[:api_version];     @api_version ||= 'v1';
-      @testnet = options[:testnet];               @testnet ||= false;
-      @debug ||= options[:debug];                 @debug ||= false;
-      @bitcoin_cash ||= options[:bitcoin_cash];   @bitcoin_cash ||= true;
+      @api_version = options[:api_version] || 'v1'
+      @coin = options[:coin] || 'btc'
+      @testnet = options[:testnet] || false
+      @debug = options[:debug] || false
     end
 
     def default_headers
       {
         'Content-Type' => 'application/json',
-        'User-Agent'=> "#{Blocktrail::SDK_USER_AGENT}/#{Blocktrail::VERSION}",
+        'User-Agent' => "#{Blocktrail::SDK_USER_AGENT}/#{Blocktrail::VERSION}",
         'Date' => Time.now.utc.iso8601
       }
     end
 
     def default_params
       {
-        'api_key'=> api_key
+        'api_key' => api_key
       }
     end
 
@@ -184,7 +184,7 @@ module Blocktrail
     private
 
     def request(method, url, payload = {}, headers = {})
-      url = "https://api.blocktrail.com/#{api_version}/#{testnet ? 't' : ''}#{bitcoin_cash ? 'bcc' : 'btc'}#{url}"
+      url = "https://api.blocktrail.com/#{api_version}/#{testnet ? 't' : ''}#{coin}#{url}"
 
       headers['Content-MD5'] = if payload.empty?
         Digest::MD5.hexdigest('') # needs url here
