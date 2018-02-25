@@ -13,10 +13,10 @@ module Blocktrail
       @api_secret = options[:api_secret].presence || ENV['BLOCKTRAIL_API_SECRET']
       raise 'No API Keys defined' if @api_key.blank? || @api_secret.blank?
 
-      @api_version = options[:api_version] || 'v1'
-      @coin = options[:coin] || 'btc'
-      @testnet = options[:testnet] || false
-      @debug = options[:debug] || false
+      @api_version = options[:api_version].presence || 'v1'
+      @coin = options[:coin].presence || 'btc'
+      @testnet = options[:testnet].presence || false
+      @debug = options[:debug].presence || false
     end
 
     def default_headers
